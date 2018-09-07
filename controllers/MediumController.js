@@ -1,5 +1,5 @@
-import axios from 'axios'
-
+// import axios from 'axios'
+const axios = require('axios')
 const POSTS_URL = 'https://medium.com/@iagoangelimc/latest?format=json'
 
 const list = (req, h) => {
@@ -24,6 +24,6 @@ const convertToJson = ( object ) => {
   return JSON.parse(object)
 }
 
-export default {
+module.exports = {
   list
 }

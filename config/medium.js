@@ -1,4 +1,2 @@
-export default {
-  CLIENT_ID: '',
-  CLIENTE_SECRET: ''
-}
+export const CLIENT_ID = ''
+export const CLIENT_SECRET = ''

@@ -1,4 +1,5 @@
-import axios from 'axios'
+// import axios from 'axios'
+const axios = require('axios')
 
 const POSTS_URL = 'http://viladosilicio.com.br/wp-json/wp/v2/'
 
@@ -22,6 +23,6 @@ const convertToJson = ( object ) => {
   return JSON.parse(object)
 }
 
-export default {
+module.exports = {
   list
 }
