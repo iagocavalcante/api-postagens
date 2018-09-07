@@ -1,10 +1,13 @@
-import Hapi from 'hapi'
-import MediumController from './controllers/MediumController'
-import VilaController from './controllers/VilaController'
+//import Hapi from 'hapi'
+//import MediumController from './controllers/MediumController'
+//import VilaController from './controllers/VilaController'
+const Hapi = require('hapi')
+const MediumController = require('./controllers/MediumController')
+const VilaController = require('./controllers/VilaController')
 
 const server = new Hapi.Server({
-  port: 3000,
-  host: 'localhost',
+  port: ~~process.env.PORT || 3000,
+  host: '0.0.0.0',
   routes: { 
     cors: { 
       origin: ['*'] 
