@@ -17,5 +17,8 @@ const removeTrashFromJson = ( json ) => json.replace('])}while(1);</x>', '')
 const convertToObject = ( object ) => JSON.parse(object)
 
 module.exports = {
-  list
+  list,
+  transformObjectToArray,
+  removeTrashFromJson,
+  convertToObject
 }
