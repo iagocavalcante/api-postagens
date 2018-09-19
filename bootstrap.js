@@ -1,1 +1,2 @@
-require('./src/factoryServer');
+require('dotenv').config()
+require('./src/factoryServer')
