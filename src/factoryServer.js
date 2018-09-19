@@ -27,8 +27,8 @@ const factoryServer = () => {
   
     console.log('Server running at:', server.info.uri)
   }
-  
   start()
+  return server
 }
 
-factoryServer()
+module.exports = factoryServer
