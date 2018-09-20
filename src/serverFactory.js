@@ -1,6 +1,5 @@
 const Hapi = require('hapi')
 const routes = require('./routes')
-require('dotenv').config()
 
 const serverFactory = () => {
   const server = new Hapi.Server({
@@ -29,16 +28,7 @@ const start = ( server ) => {
   })
 }
 
-const stop = ( server ) => {
-  server.stop({ timeout: 10000 })
-    .then( err => {
-      console.log('hapi server stopped')
-      process.exit((err) ? 1 : 0)
-    })
-}
-
 module.exports = {
   serverFactory,
   start,
-  stop
 }

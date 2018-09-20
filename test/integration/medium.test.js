@@ -1,3 +1,4 @@
+require('dotenv').config()
 const serverFactory = require('../../src/serverFactory')
 
 describe('Medium Handler', () => {
