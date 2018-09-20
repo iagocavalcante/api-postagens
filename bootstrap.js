@@ -1,2 +1,2 @@
-require('dotenv').config()
-require('./src/factoryServer')()
+const serverFactory = require('./src/serverFactory')
+serverFactory.start( serverFactory.serverFactory() )
