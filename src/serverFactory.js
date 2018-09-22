@@ -1,6 +1,6 @@
 const Hapi = require('hapi')
 const routes = require('./routes')
-
+//testing deploy pipeline with jenkins and githooks
 const serverFactory = () => {
   const server = new Hapi.Server({
     port: process.env.PORT || 3000,
