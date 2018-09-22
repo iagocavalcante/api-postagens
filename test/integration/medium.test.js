@@ -9,11 +9,11 @@ describe('Medium Handler', () => {
   }
 
   test('Respond with status code 200', (done) => {
-    return serverFactory.serverFactory().inject(request)
+    serverFactory.serverFactory().inject(request)
       .then(response => {
         expect(response.statusCode).toBe(200)
         expect(response.result).toBeInstanceOf(Array)
-        done()
       })
+    done()    
   })
 })
