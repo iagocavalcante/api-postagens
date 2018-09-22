@@ -1,6 +1,6 @@
 {
   "name": "api-postagens",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Api to call medium and vila do silicio posts",
   "main": "index.js",
   "scripts": {
