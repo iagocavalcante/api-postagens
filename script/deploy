@@ -1,8 +1,0 @@
-#!/bin/sh
-ssh root@104.131.63.80 <<EOF
- cd ~/api-postagens
- git pull
- npm install --production
- pm2 restart all
- exit
-EOF
