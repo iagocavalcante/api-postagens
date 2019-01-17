@@ -4,7 +4,7 @@
   "description": "Api to call medium and vila do silicio posts",
   "main": "index.js",
   "scripts": {
-    "dev": "pm2 start bootstrap.js --watch",
+    "dev": "pm2-dev bootstrap.js",
     "pm2": "pm2",
     "test": "jest --detectOpenHandles"
   },
