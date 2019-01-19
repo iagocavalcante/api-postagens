@@ -1,4 +1,5 @@
 module.exports = [
-  require('./medium'),
+  require('./medium-list'),
+  require('./medium-show-post'),
   require('./vila')
 ]
