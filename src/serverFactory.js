@@ -3,7 +3,7 @@ const routes = require('./routes')
 //testing deploy pipeline with jenkins and githooks
 const serverFactory = () => {
   const server = new Hapi.Server({
-    port: process.env.PORT || 3000,
+    port: process.env.PORT || 5000,
     host: 'localhost',
     routes: { 
       cors: { 
