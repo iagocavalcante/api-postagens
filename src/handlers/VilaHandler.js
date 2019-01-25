@@ -1,14 +1,9 @@
-// import axios from 'axios'
 const axios = require('axios')
 
-const POSTS_URL = 'http://viladosilicio.com.br/wp-json/wp/v2/'
-
 const list = (req, h) => {
-  return axios.get(`${POSTS_URL}posts?author=5&_embed&_jsonp`)
-    .then(response => {
-      return response.data
-    })
-    .catch(error => error.data)
+  return axios.get(`${process.env.VILADOSILICIO_HOST}posts?author=5&_embed&_jsonp`)
+    .then( response => response.data )
+    .catch( error => Promise.reject(error.data) )
 }
 
 module.exports = {

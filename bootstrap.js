@@ -1,2 +1,3 @@
-require('babel-core/register');
-require('./src/server');
+require('dotenv').config()
+const serverFactory = require('./src/serverFactory')
+serverFactory.start( serverFactory.serverFactory() )
