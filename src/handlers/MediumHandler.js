@@ -32,6 +32,7 @@ const replaceUserAndPostInUrl = ( name, postName ) => process.env.MEDIUM_HOST_PO
 
 const transformInHtml = ( paragraphs ) => 
 	paragraphs.reduce((html, paragraph) => {
+    if (paragraph.type === 11) paragraph.text = paragraph.iframe.thumbnailUrl
 		return html.concat({text: `${paragraph.text}`, tag: checkType(paragraph.type)})
 	}, [])
 
