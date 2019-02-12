@@ -15,7 +15,7 @@ const showPost = (req, h) => {
 			const cleanPosts = removeTrashFromJson(response.data)
 			const postObject = convertToObject(cleanPosts)
 			const post = transformInHtml(postObject.payload.value.content.bodyModel.paragraphs)
-			return h.response(post)
+			return h.response(postObject)
 		})
 		.catch(error => Promise.reject(error.data))
 }
@@ -32,7 +32,7 @@ const replaceUserAndPostInUrl = ( name, postName ) => process.env.MEDIUM_HOST_PO
 
 const transformInHtml = ( paragraphs ) => 
 	paragraphs.reduce((html, paragraph) => {
-    if (paragraph.type === 11) paragraph.text = paragraph.iframe.thumbnailUrl
+    if (!paragraph.type && paragraph.type === 11) paragraph.text = paragraph.iframe.thumbnailUrl
 		return html.concat({text: `${paragraph.text}`, tag: checkType(paragraph.type)})
 	}, [])
 
