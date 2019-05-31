@@ -21,7 +21,7 @@
     "babel-core": "^6.26.3",
     "babel-preset-es2015": "^6.24.1",
     "boom": "^7.3.0",
-    "dotenv": "^6.2.0",
+    "dotenv": "^8.0.0",
     "hapi": "^17.8.1",
     "medium-sdk": "0.0.4",
     "nodemon": "^1.18.9",
