@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "eslint": "7.5.0",
-    "jest": "25.1.0"
+    "jest": "25.5.4"
   },
   "jest": {
     "testEnvironment": "node"
