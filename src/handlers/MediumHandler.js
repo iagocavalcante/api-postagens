@@ -56,6 +56,10 @@ async function renderParagraph(paragraph) {
 		gist = await requestGistHtml(iframe)
 	}
 
+	if (paragraph.type === 8) {
+		paragraph.text = safeTagsReplace(paragraph.text)
+	}
+
   return {
     text: paragraph.text || '',
     tag: checkType(paragraph.type),
@@ -67,7 +71,22 @@ async function renderParagraph(paragraph) {
   }
 }
 
+
+function replaceTag(tag) {
+	return TAGS_REPLACE[tag] || tag;
+}
+
+function safeTagsReplace(str) {
+	return str.replace(/[&<>]/g, replaceTag);
+}
+
 const checkType = ( type ) => TYPES[type]
+
+const TAGS_REPLACE = {
+	'&': '&amp;',
+	'<': '&lt;',
+	'>': '&gt;'
+};
 
 const TYPES = {
 	0: '<p>_$_</p>',
