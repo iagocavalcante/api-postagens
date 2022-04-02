@@ -2,8 +2,6 @@ defmodule ApiPostsV2.Crawler do
   use Tesla
   require Logger
 
-  # create
-
   defp tesla_client(),
     do:
       Tesla.client([
@@ -21,28 +19,25 @@ defmodule ApiPostsV2.Crawler do
   defp request_post_data(url) do
     Logger.info("Extracting infos from: #{url}\n")
 
-    {:ok, response} =
-      Tesla.get(
-        tesla_client(),
-        "https://medium.com/@arifgilany/new-habits-f83afe376644?format=json"
-      )
+    case Tesla.get(
+           tesla_client(),
+           "https://medium.com/@arifgilany/new-habits-f83afe376644?format=json"
+         ) do
+      {:ok, response} ->
+        response = response.body |> remove_trash_from_body()
+        response = Jason.decode!(response)
 
-    response = response.body |> safe_replace_tag()
-    response = Jason.decode!(response)
+        paragraphs = response["payload"]["value"]["content"]["bodyModel"]["paragraphs"]
 
-    paragraphs =
-      response
-      |> Map.get("payload")
-      |> Map.get("value")
-      |> Map.get("content")
-      |> Map.get("bodyModel")
-      |> Map.get("paragraphs")
+        correct_paragraphs = Enum.map(paragraphs, &replace_paragraphs/1)
 
-    correct_paragraphs = Enum.map(paragraphs, fn x -> replace_paragraphs(x) end)
+        IO.inspect(correct_paragraphs)
 
-    IO.inspect(correct_paragraphs)
+        correct_paragraphs
 
-    correct_paragraphs
+      {:error, _} ->
+        Logger.info("Extracting infos from: #{url}\n")
+    end
   end
 
   defp replace_tag(tag) do
@@ -50,7 +45,7 @@ defmodule ApiPostsV2.Crawler do
       "&" -> "&amp;"
       "<" -> "&lt;"
       ">" -> "&gt;"
-      default -> tag
+      _ -> tag
     end
   end
 
@@ -71,7 +66,7 @@ defmodule ApiPostsV2.Crawler do
     end
   end
 
-  defp safe_replace_tag(content) do
+  defp remove_trash_from_body(content) do
     String.replace(content, "])}while(1);</x>", "")
   end
 
@@ -80,58 +75,67 @@ defmodule ApiPostsV2.Crawler do
 
     gist = ""
 
-    if paragraph
-       |> Map.get("iframe") do
-      iframe = iframe_extract(paragraph |> Map.get("iframe"))
+    if paragraph["iframe"] do
+      iframe = iframe_extract(paragraph["iframe"])
       gist = gist_extract(iframe)
     end
 
+    if paragraph["type"] == 8 do
+      Map.merge(paragraph["text"], replace_tag(paragraph["text"]))
+    end
+
     result = %{
-      text: paragraph |> Map.get("text", ""),
-      tag: correct_tag(paragraph |> Map.get("type", "")),
-      mixtapeMetadata: paragraph |> Map.get("mixtapeMetadata", ""),
+      text: paragraph["text"],
+      tag: correct_tag(paragraph["type"]),
+      mixtapeMetadata: paragraph["mixtapeMetadata"],
       iframe: iframe,
       gist: gist,
       markups:
-        if Enum.count(paragraph |> Map.get("markups", [])) > 0 do
-          paragraph |> Map.get("markups")
+        if Enum.any?(paragraph["markups"]) do
+          paragraph["markups"]
         else
           []
         end,
-      metadata: paragraph |> Map.get("metadata", "")
+      metadata: paragraph["metadata"]
     }
 
     result
   end
 
   defp iframe_extract(iframe) do
-    resource_id = iframe |> Map.get("mediaResourceId")
+    resource_id = iframe["mediaResourceId"]
 
-    {:ok, response} =
-      Tesla.get(
-        tesla_client(),
-        "https://medium.com/media/#{resource_id}"
-      )
+    case Tesla.get(
+           tesla_client(),
+           "https://medium.com/media/#{resource_id}"
+         ) do
+      {:ok, response} ->
+        response = response.body |> remove_trash_from_body()
+        response = Jason.decode!(response)
 
-    response = response.body |> safe_replace_tag()
-    response = Jason.decode!(response)
+        iframe_payload = response["payload"]["value"]
+        IO.inspect(iframe_payload)
+        iframe_payload
 
-    iframe_payload = response |> Map.get("payload") |> Map.get("value")
-    IO.inspect(iframe_payload)
-    iframe_payload
+      {:error, _} ->
+        Logger.info("Error extracting iframe from: #{resource_id}\n")
+    end
   end
 
   defp gist_extract(iframe) do
-    domain = iframe |> Map.get("domain")
-    gist_id = domain |> Map.get("gistId")
+    domain = iframe["domain"]
+    gist_id = domain["gistId"]
 
-    {:ok, response} =
-      Tesla.get(
-        tesla_client(),
-        "https://#{domain}/#{gist_id}.json"
-      )
+    case Tesla.get(
+           tesla_client(),
+           "https://#{domain}/#{gist_id}.json"
+         ) do
+      {:ok, response} ->
+        response = Jason.decode!(response)
+        response
 
-    response = Jason.decode!(response)
-    response
+      {:error, _} ->
+        Logger.info("Error calling gist json")
+    end
   end
 end
