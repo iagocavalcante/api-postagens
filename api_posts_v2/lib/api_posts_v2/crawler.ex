@@ -9,10 +9,6 @@ defmodule ApiPostsV2.Crawler do
       ])
 
   def scrap(url) do
-    unless url do
-      Logger.info("URL is required")
-    end
-
     request_post_data(url)
   end
 
@@ -21,19 +17,31 @@ defmodule ApiPostsV2.Crawler do
 
     case Tesla.get(
            tesla_client(),
-           "https://medium.com/@arifgilany/new-habits-f83afe376644?format=json"
+           url
          ) do
       {:ok, response} ->
         response = response.body |> remove_trash_from_body()
-        response = Jason.decode!(response)
 
-        paragraphs = response["payload"]["value"]["content"]["bodyModel"]["paragraphs"]
+        case Jason.decode(response) do
+          {:ok, json} ->
+            if json.is_a?(Array) then
+              paragraphs = json["payload"]["value"]["content"]["bodyModel"]["paragraphs"]
 
-        correct_paragraphs = Enum.map(paragraphs, &replace_paragraphs/1)
+              correct_paragraphs = Enum.map(paragraphs, &replace_paragraphs/1)
 
-        IO.inspect(correct_paragraphs)
+              Logger.info("Found #{json.size} posts")
 
-        correct_paragraphs
+              correct_paragraphs
+            else
+              Logger.info("Found 1 post")
+
+              [json]
+            end
+
+          {:err, err} ->
+            Logger.error("Error while decoding JSON: #{err}")
+            nil
+        end
 
       {:error, _} ->
         Logger.info("Extracting infos from: #{url}\n")
@@ -111,11 +119,15 @@ defmodule ApiPostsV2.Crawler do
          ) do
       {:ok, response} ->
         response = response.body |> remove_trash_from_body()
-        response = Jason.decode!(response)
+        case Jason.decode(response) do
+          {:ok, json} ->
+            iframe_payload = json["payload"]["value"]
 
-        iframe_payload = response["payload"]["value"]
-        IO.inspect(iframe_payload)
-        iframe_payload
+            iframe_payload
+          {:err, err} ->
+            Logger.error("Error while decoding JSON: #{err}")
+            nil
+        end
 
       {:error, _} ->
         Logger.info("Error extracting iframe from: #{resource_id}\n")
@@ -131,8 +143,13 @@ defmodule ApiPostsV2.Crawler do
            "https://#{domain}/#{gist_id}.json"
          ) do
       {:ok, response} ->
-        response = Jason.decode!(response)
-        response
+        case Jason.decode(response) do
+          {:ok, json} ->
+            response
+          {:err, err} ->
+            Logger.error("Error while decoding JSON: #{err}")
+            nil
+        end
 
       {:error, _} ->
         Logger.info("Error calling gist json")
