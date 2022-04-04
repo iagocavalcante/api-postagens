@@ -24,19 +24,13 @@ defmodule ApiPostsV2.Crawler do
 
         case Jason.decode(response) do
           {:ok, json} ->
-            if json.is_a?(Array) then
-              paragraphs = json["payload"]["value"]["content"]["bodyModel"]["paragraphs"]
+            paragraphs = json["payload"]["value"]["content"]["bodyModel"]["paragraphs"]
 
-              correct_paragraphs = Enum.map(paragraphs, &replace_paragraphs/1)
+            IO.inspect(paragraphs)
 
-              Logger.info("Found #{json.size} posts")
+            correct_paragraphs = Enum.map(paragraphs, &replace_paragraphs/1)
 
-              correct_paragraphs
-            else
-              Logger.info("Found 1 post")
-
-              [json]
-            end
+            correct_paragraphs
 
           {:err, err} ->
             Logger.error("Error while decoding JSON: #{err}")
@@ -79,25 +73,17 @@ defmodule ApiPostsV2.Crawler do
   end
 
   defp replace_paragraphs(paragraph) do
-    iframe = ""
-
-    gist = ""
-
     if paragraph["iframe"] do
-      iframe = iframe_extract(paragraph["iframe"])
-      gist = gist_extract(iframe)
+      Map.merge(paragraph["iframe"], iframe_extract(paragraph["iframe"]))
+      Map.merge("gist", gist_extract(iframe_extract(paragraph["iframe"])))
     end
 
-    if paragraph["type"] == 8 do
-      Map.merge(paragraph["text"], replace_tag(paragraph["text"]))
-    end
-
-    result = %{
+    %{
       text: paragraph["text"],
       tag: correct_tag(paragraph["type"]),
       mixtapeMetadata: paragraph["mixtapeMetadata"],
-      iframe: iframe,
-      gist: gist,
+      iframe: paragraph["iframe"],
+      gist: paragraph["gist"],
       markups:
         if Enum.any?(paragraph["markups"]) do
           paragraph["markups"]
@@ -106,8 +92,6 @@ defmodule ApiPostsV2.Crawler do
         end,
       metadata: paragraph["metadata"]
     }
-
-    result
   end
 
   defp iframe_extract(iframe) do
@@ -119,11 +103,13 @@ defmodule ApiPostsV2.Crawler do
          ) do
       {:ok, response} ->
         response = response.body |> remove_trash_from_body()
+
         case Jason.decode(response) do
           {:ok, json} ->
             iframe_payload = json["payload"]["value"]
 
             iframe_payload
+
           {:err, err} ->
             Logger.error("Error while decoding JSON: #{err}")
             nil
@@ -134,8 +120,7 @@ defmodule ApiPostsV2.Crawler do
     end
   end
 
-  defp gist_extract(iframe) do
-    domain = iframe["domain"]
+  defp gist_extract(%{"domain" => domain = _iframe}) do
     gist_id = domain["gistId"]
 
     case Tesla.get(
@@ -145,7 +130,8 @@ defmodule ApiPostsV2.Crawler do
       {:ok, response} ->
         case Jason.decode(response) do
           {:ok, json} ->
-            response
+            json
+
           {:err, err} ->
             Logger.error("Error while decoding JSON: #{err}")
             nil
