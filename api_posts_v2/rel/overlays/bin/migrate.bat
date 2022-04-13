@@ -1,0 +1,1 @@
+call "%~dp0\api_posts_v2" eval ApiPostsV2.Release.migrate
